@@ -55,10 +55,10 @@ def create_kernel(r, normed=True):
 
 
 # Convolution and packing in tensor 
-def convolutions(img, max_r=5):
+def convolutions(img, max_r=5, normed=True):
     stack = np.zeros((max_r, *img.shape))
     for r in range(max_r):
-        stack[r] = cv2.filter2D(img.astype(float), -1, create_kernel(r))
+        stack[r] = cv2.filter2D(img.astype(float), -1, create_kernel(r, normed))
     return stack
 
 
@@ -120,4 +120,3 @@ def fit_obj(id, objects, img):
     popt[4] *= const
     print('A = {:.2f}, center = ({:.2f}, {:.2f}),\nfwhm = ({:.2f}, {:.2f}), floor = {:.2f}'.format(*popt))
     return popt
-
