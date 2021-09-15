@@ -94,8 +94,8 @@ def Gaussian(data_tuple, amplitude, xo, yo, sigma_x, sigma_y, floor):
     xo = float(xo)                                                              
     yo = float(yo)                                                              
     a = 1/(2*sigma_x**2)
-    c = 1/(2*sigma_y**2)   
-    g = floor + amplitude*np.exp( - (a*((x-xo)**2) + c*((y-yo)**2)))                                   
+#     c = 1/(2*sigma_y**2)   
+    g = floor + amplitude*np.exp( - (a*((x-xo)**2) + a*((y-yo)**2)))                                   
     return g.ravel()
 
 
@@ -118,5 +118,5 @@ def fit_obj(id, objects, img):
     popt[2] += y-r+1
     popt[3] *= const
     popt[4] *= const
-    print('A = {:.2f}, center = ({:.2f}, {:.2f}),\nfwhm = ({:.2f}, {:.2f}), floor = {:.2f}'.format(*popt))
+#     print('A = {:.2f}, center = ({:.2f}, {:.2f}),\nfwhm = ({:.2f}, {:.2f}), floor = {:.2f}'.format(*popt))
     return popt
