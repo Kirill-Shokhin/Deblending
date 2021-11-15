@@ -1,47 +1,33 @@
-from numpy import zeros, array
+import numpy as np
+from scipy.special import gamma, gammainc, gammaincinv
 
-MIN_SIZE = 1e-6
+def b(n):
+    return gammaincinv(2*n, 0.5) # сразу точный расчет через обратную ГФ
 
-def sersic(radius: int, 
-           Ib:float = 60, 
-           alpha: float = 1, 
-           beta: float = 0.3, 
-           gamma:float = 0.5, 
-           rb:float = 11, 
-           phi:float = 0) -> array:
-    """
-    Create a galaxy with the Sersic intensity profile (see, e.g. 
-    https://iopscience.iop.org/article/10.1086/375320/pdf, page 1, formula 1)
-    
-    I(r) = I_b * 2^[(beta - gamma)/alpha] * (r/rb)^(-gamma) *
-         * {1 + (r/rb)^alpha}^[(gamma-beta)/alpha]
-         
-    :params:
-        radius: float - galactic radius in scale units (e.g. pixels or arcseconds)
-    :keywords:
-        Ib: float - peak itensity of the galactic core (default to 60 counts)
-        alpha: float - transition parameter, controlling the smoothing between the two powerlaws (default to 0.3)
-        beat: float 
-    """
-    
-    # TODO:
-    # Even kernel generation
-    # Rotation and assymetry
-    # Spirals
-    
-    galaxy_image = np.zeros((r, r))
-    x0 = y0 = r // 2
-    # Galactic core
-    for x in range(-x0, x0+1):
-        for y in range(-y0, y0+1):
-            # Trace a circluar area, not the rectangular
-            if np.hypot(x, y) > x0:
-                continue
-            bga = (beta-gamma)/alpha
-            gba = -bga
-            rrb = (x**2 + y**2) / rb
-            rrb = MIN_SIZE if rrb < MIN_SIZE else rrb
-            galaxy_image[x+x0,y+y0] = Ib*2**(bga)*(rrb)**(-gamma)
-            galaxy_image[x+x0,y+y0] *= (1 + rrb**alpha)**gba
-            
-    return galaxy_image
+def flux_1d_sersic(n=1, r_e=50, max_=1):
+    return 2*max_*n*r_e*gamma(n)/b(n)**(n)
+
+def flux_2d_sersic(n=1, r_e=50, max_=1, ellip=0):
+    return 2*np.pi*n*max_*r_e**2*gamma(2*n)*(1-ellip)/b(n)**(2*n)
+
+def cdf_sersic(x, n=1, r_e=50):
+    x = np.array(x)
+    return 0.5*(1 + np.sign(x)*gammainc(n, b(n)*(np.abs(x)/r_e)**(1/n)))
+
+def ppf_sersic(y, n=1, r_e=50):
+    y= np.array(y)
+    return np.sign(y-0.5)*r_e*(gammaincinv(n, 2*np.abs(y-0.5))/b(n))**n
+
+def Sersic_1D(x, n=1, r_e=50, max_=1):
+    x = np.array(x)
+    return max_*np.exp(-b(n)*(np.abs(x)/r_e)**(1/n))
+
+def Sersic_2D(center, theta=0, ellip=0, n=2, r_e=5, size = 100, max_ = 1):
+    x0, y0 = center
+    theta *= np.pi/180
+    x = np.arange(size)
+    y = x[:,np.newaxis]
+    a, b = r_e, (1 - ellip) * r_e
+    major = (x-x0) * np.cos(theta) + (y-y0) * np.sin(theta)
+    minor = -(x-x0) * np.sin(theta) + (y-y0) * np.cos(theta)
+    return max_*np.exp(-b_n*((np.hypot(major/a, minor/b))**(1/n)))
