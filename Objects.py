@@ -2,7 +2,6 @@ import numpy as np
 from scipy.special import gamma, gammainc, gammaincinv, hyp2f1
 from scipy.optimize import minimize
 import plotly.express as px
-from numpy.random import normal, random
 
 class Moffat: #!!! beta > 1 !!!
     def __init__(self, beta=2, max_=1, x_in_cell=0.5, y_in_cell=0.5, ratio=3, box_ratio=1.5, r_e=None, fwhm=None):
@@ -183,7 +182,7 @@ class Sersic:
         return x1, y1
     
     def cxcy2ltrb(self, cx, cy):
-        return cx-self.w_box/2, cy+self.h_box/2, cx+self.w_box/2, cy-self.h_box/2
+        return cx-self.w_box/2, cy-self.h_box/2, cx+self.w_box/2, cy+self.h_box/2
     
     def make_odd(self, x):
         x = np.array(x)
