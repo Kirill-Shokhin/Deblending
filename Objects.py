@@ -66,8 +66,8 @@ class Moffat: #!!! beta > 1 !!!
         return x, y
     
     def make_2d(self):
-        x = np.arange(2*self.r_int+1)
-        y = x[:,np.newaxis]
+        y = np.arange(2*self.r_int+1)
+        x = y[:,np.newaxis]
         return self.moffat(np.hypot(x-self.r_int-(self.x_in_cell-0.5), y-self.r_int-(self.y_in_cell-0.5)))
     
     def plot_1d(self):
@@ -77,7 +77,7 @@ class Moffat: #!!! beta > 1 !!!
     
     def plot_2d(self, zmax=1):
         x1, y1, x2, y2 = self.cxcy2ltrb(self.r_int+self.x_in_cell-0.5, self.r_int+self.y_in_cell-0.5)
-        fig = px.imshow(self.make_2d(), zmax=zmax*self.max_)
+        fig = px.imshow(self.make_2d().T, zmax=zmax*self.max_) # .T антиповорот
         fig.add_shape(type="rect", x0=x1, y0=y1, x1=x2, y1=y2, line=dict(color='red'))
         return fig
     
@@ -158,8 +158,8 @@ class Sersic:
         return x, y
     
     def make_2d(self): # w, h нечетные, чтобы объект был в центральном пикселе
-        x, y = self.rotation(np.arange(self.w)-self.w/2-self.x_in_cell+1,
-                             (np.arange(self.h)-self.h/2-self.y_in_cell+1)[:, None], self.theta)
+        x, y = self.rotation(np.arange(self.w)[:, None]-self.w/2-self.x_in_cell+1,
+                             np.arange(self.h)-self.h/2-self.y_in_cell+1, self.theta)
         r = np.hypot(x, y/(1-self.ellip))
         return self.sersic(r)
     
@@ -170,15 +170,15 @@ class Sersic:
         return fig
     
     def plot_2d(self, zmax=0.5):
-        img = self.make_2d()
+        img = self.make_2d().T # антиповорот 
         x1, y1, x2, y2 = self.cxcy2ltrb(self.w/2+self.x_in_cell-1, self.h/2+self.y_in_cell-1)
         fig = px.imshow(img, zmax=zmax*self.max_)
-        fig.add_shape(type="rect", x0=x1, y0=y1, x1=x2, y1=y2, line=dict(color='red'))
+        fig.add_shape(type="rect", x0=x1, y0=y1, x1=x2, y1=y2, line=dict(color='red')) 
         return fig
     
     def rotation(self, x, y, theta):
-        x1 = x*np.cos(theta) + y*np.sin(theta)
-        y1 = -x*np.sin(theta) + y*np.cos(theta)
+        x1 = x*np.cos(theta) - y*np.sin(theta)
+        y1 = x*np.sin(theta) + y*np.cos(theta)
         return x1, y1
     
     def cxcy2ltrb(self, cx, cy):

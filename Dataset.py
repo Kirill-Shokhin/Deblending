@@ -57,9 +57,9 @@ class Create_data:
             self.params.loc[index, ('w_box', 'h_box')] = w_box, h_box
             self.params.at[index, 'ltrb_box'] = obj.cxcy2ltrb(cx+x_in_cell-0.5, cy+y_in_cell-0.5)
             self.params.loc[index, 'flux'] = obj.flux_in_box
-            img[max(cy-y,0):min(cy+y+1, self.size),
-                max(cx-x,0):min(cx+x+1, self.size)] += obj.make_2d()[max(y-cy,0):min(self.size-cy+y, 2*y+1),
-                                                      max(x-cx,0):min(self.size-cx+x, 2*x+1)]
+            img[max(cx-x,0):min(cx+x+1, self.size),
+                max(cy-y,0):min(cy+y+1, self.size)] += obj.make_2d()[max(x-cx,0):min(self.size-cx+x, 2*x+1),
+                                                      max(y-cy,0):min(self.size-cy+y, 2*y+1)]
         if noise:
             img += self.poisson_noise()
         return img.astype('int32')
@@ -69,10 +69,10 @@ class Create_data:
         return self.rng.normal(self.lam, np.sqrt(self.lam), (self.size, self.size))
     
     def plot(self, bbox=True, noise=True):
-        fig = px.imshow(self.create_image(noise))
+        fig = px.imshow(self.create_image(noise)) 
         if bbox:
             for x1, y1, x2, y2 in self.params.ltrb_box:
-                fig.add_shape(type="rect", x0=x1, y0=y1, x1=x2, y1=y2, line=dict(color='red'))
+                fig.add_shape(type="rect", x0=y1, y0=x1, x1=y2, y1=x2, line=dict(color='red')) # антиповорот 
         return fig
     
     def data(self, columns=None, noise=True):
@@ -86,8 +86,8 @@ class Create_data:
     
     def mask(self): # маска на изображение (cells)
         mask = np.zeros((self.size, self.size), dtype=bool)
-        mask[self.params['cy'], self.params['cx']] = True
-        return mask
+        mask[self.params['cx'], self.params['cy']] = True
+        return mask 
     
 class Create_dataset(Create_data):
     def __init__(self, n_images=1, n_objects=100, size=200, lam=[100, 10000], p=0.5, seed=None):
