@@ -30,8 +30,8 @@ class Create_data:
         fwhm = np.abs(self.rng.normal(scale=3, size=(self.n_objects)))+1
         max_ = 10*np.sqrt(self.lam)*(1+self.rng.rand(self.n_objects))*fwhm
         
-        beta = np.abs(self.rng.normal(scale=3, size=(self.n_objects-class_.sum())))+1.5
-        n = 0.5 + self.rng.rand(class_.sum())*np.log(max_[class_==1])*fwhm[class_==1]/20
+        beta = np.abs(self.rng.normal(scale=5, size=(self.n_objects-class_.sum())))+2
+        n = 0.5 + self.rng.rand(class_.sum())
         beta_n = np.zeros(self.n_objects)
         beta_n[class_==0] = beta
         beta_n[class_==1] = n
@@ -51,7 +51,7 @@ class Create_data:
                 x, y = (obj.r_int, obj.r_int)
                 w_box, h_box = (2*obj.box_r, 2*obj.box_r)
             elif class_ == 1:
-                obj = Sersic(beta, max_, 360*self.rng.rand(), self.rng.rand()/1.5, x_in_cell, y_in_cell, fwhm=fwhm, ratio=30)
+                obj = Sersic(beta, max_, 360*self.rng.rand(), self.rng.rand()/1.5, x_in_cell, y_in_cell, fwhm=fwhm, ratio=10)
                 x, y = (int(obj.w/2), int(obj.h/2))    
                 w_box, h_box = obj.w_box, obj.h_box
             self.params.loc[index, ('w_box', 'h_box')] = w_box, h_box
@@ -82,7 +82,10 @@ class Create_data:
             params = params
         else:
             params = params[columns]
-        return img, self.mask(), params.astype('float32').values
+        mask = self.mask()
+        gt = np.zeros((len(columns), 200, 200))
+        gt[:, mask] = params.astype('float32').values.T
+        return img, mask, gt
     
     def mask(self): # маска на изображение (cells)
         mask = np.zeros((self.size, self.size), dtype=bool)
